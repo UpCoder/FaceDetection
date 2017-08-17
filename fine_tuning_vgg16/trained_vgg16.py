@@ -14,7 +14,7 @@ from tools import do_conv, pool, FC_layer, batch_norm, load_with_skip
 
 
 class vgg16:
-    def __init__(self, imgs, weights=None, sess=None):
+    def __init__(self, imgs, weights=None, sess=None, load_last_layer=False):
         self.imgs = imgs
         self.trainable = {
             'conv1_1': False,
@@ -59,8 +59,10 @@ class vgg16:
         self.y = self.fcs_output
         # self.feature = self.fc2
         if weights is not None and sess is not None:
-            load_with_skip(weights, sess, ['fc8'])
-
+            if not load_last_layer:
+                load_with_skip(weights, sess, ['fc8'])
+            else:
+                load_with_skip(weights, sess, [])
 
     def convlayers(self):
         self.parameters = []

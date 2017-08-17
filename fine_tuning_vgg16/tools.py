@@ -172,3 +172,25 @@ def save_weights(save_path, names):
         res_dict
     )
     print 'save successful', save_path
+
+
+def calculate_features(images, sess, cal_tensor, input_tensor):
+    length = len(images)
+    batch_size = 100
+    features = []
+    index = 0
+    while index < length:
+        end_index = index + batch_size
+        if end_index >= length:
+            end_index = length
+        batch_images = images[index:end_index]
+        train_features = sess.run(
+            cal_tensor,
+            feed_dict={
+                input_tensor: batch_images
+            }
+        )
+        features.extend(train_features)
+        index += batch_size
+    print 'features shape is ', np.shape(features)
+    return np.array(features)

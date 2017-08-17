@@ -17,7 +17,7 @@ SAVE_TEMP = True
 
 # save selected bounding box image
 def save_selected_image():
-    create_single_npy('/home/give/Documents/dataset/FaceDetection/FDDB-folds/FDDB-fold-02-ellipseList.txt', save_selected=True)
+    create_single_npy('/home/give/Documents/dataset/FaceDetection/FDDB-folds/FDDB-fold-03-ellipseList.txt', save_selected=True)
 
 
 # calculate the label(IoU value)

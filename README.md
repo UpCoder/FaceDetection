@@ -1,5 +1,24 @@
-- directly using vgg16, it is using same params that include the param of conv and  the param of full connection
-    - how to run? 
-        - test_image_path is the detected image path
-        - flod_dir is the training dataset. Due to the limit of memeory, we just extract one floder images's boudning box
-        - point two value, then run trained_vgg16.npy
+- 首先，我们介绍一下我们的项目结构
+    - 根目录下面的文件是我当初想自己从头训练整个网络时，定义的一些文件
+        - CreateNPY.py 是用来创建ｎｐｙ文件的函数，是将bounding box提取出来存在npy文件中。
+        - DataSet.py 封装输入的文件，用于训练的时候生成数据集
+        - LeNet.py LeNet网络结构文件
+        - ReadyData.py 将ＦＤＤＢ数据集移动到１０个文件夹中，代表的是１０折
+        - Tools.py　封装了一些和深度学习无关的操作
+        - train.py 训练
+        - VGG16.py ＶＧＧ网络结构文件
+    - trained_vgg16: 训练好的VGG网络结构，直接运行该模型，看一下是否可以得到正确的结果
+        - train_vgg16.py 网络结构文件，包括了main函数的入口，可以直接执行该文件，看是否可以得到合适的输出
+    - directly_using_vgg16：直接使用训练好的VGG网络结构来做人脸的检测
+        - train_vgg16.py 网络结构文件，包括了ｍａｉｎ函数的入口，在里面我们可以指定待检测图像的路径，然后运行看看检车的结果
+    - fine_tuing_vgg16：对ＶＧＧ网络进行了微调
+        - DataSet.py 封装输入的文件，用于训练的时候生成数据集
+        - SVR.py 用来对ＣＮＮ网络提取出来的特征进行回归打分
+        - test.py 测试入口，里面可以指定待检测图像的路径，进行测试
+        - tools.py 这里面主要封装了一些和神经网络有关的操作
+        - train_fc.py 通过该文件对ＶＧＧ网络进行微调
+        - trained_vgg16.py　ＶＧＧ网络结构文件
+- 然后我们介绍一下我们的数据集：我们用了ＦＤＤＢ数据集，下载地址如下：[FDDB](http://vis-www.cs.umass.edu/fddb/)
+- 训练好模型的下载地址
+    - [VGG16(version1)](), 这个主要是用在trained_vgg16这个文件夹下面的，主要是用这个参数去微调，总是不收敛，所以才有了下面的ｖｅｒｓｉｏｎ２
+    - [VGG16(version2)](), 这个是用ＩｍａｇｅＮｅｔ训练的网络参数，感觉鲁棒性较好。

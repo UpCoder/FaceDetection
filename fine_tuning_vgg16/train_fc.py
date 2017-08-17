@@ -8,9 +8,9 @@ from tools import calculate_loss, calculate_accuracy, save_weights
 
 class train:
     def __init__(self):
-        flod_dir = '/home/give/Documents/dataset/FaceDetection/Bounding_Box/01'
-        val_dir = '/home/give/Documents/dataset/FaceDetection/Bounding_Box/02'
-        threshold = 0.3
+        flod_dir = '/home/give/Documents/dataset/FaceDetection/Bounding_Box/train'
+        val_dir = '/home/give/Documents/dataset/FaceDetection/Bounding_Box/03'
+        threshold = 0.5
         self.dataset = OneFlodDataSet(flod_dir, threshold)
         self.val_dataset = OneFlodDataSet(val_dir, threshold)
         sess = tf.Session()

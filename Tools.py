@@ -198,12 +198,12 @@ def non_maximum_suppression(image_path, scores, regions, type='cross'):
     sorted_index = np.argsort(scores)
     scores = scores[sorted_index]
     regions = regions[sorted_index]
-    threshold = 0.5
+    threshold = 0.3
     deleted = np.zeros(len(scores))
     for index, score in enumerate(scores):
         if deleted[index] == 1.0:
             continue
-        draw_rects_in_image(image_path, [regions[index]])
+        # draw_rects_in_image(image_path, [regions[index]])
         print index
         cur_region = regions[index]
         for i in range(index+1, len(regions)):
