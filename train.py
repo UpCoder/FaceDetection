@@ -12,10 +12,11 @@ IMAGE_W = 224
 IMAGE_H = 224
 IMAGE_CHANNAL = 3
 OUTPUT_NODE = 2
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-1
 MAX_ITERATION = int(1e+5)
-BATCH_SZIE = 256
-BATCH_DISTRIBUTION = [128, 128]
+BATCH_SZIE = 100
+BATCH_DISTRIBUTION = [50, 50]
+MOVING_AVERAGE_DECAY = 0.99
 
 
 def train(dataset):
@@ -38,13 +39,23 @@ def train(dataset):
         name='input_y'
     )
     feature, y = VGG16.inference(x, None)
-    # y = LeNet.interfernece(x, True, None)
-    loss = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(
-            logits=y,
-            labels=y_
-        )
+    global_step = tf.Variable(0, trainable=False)
+    variable_averagers = tf.train.ExponentialMovingAverage(
+        MOVING_AVERAGE_DECAY,
+        global_step
     )
+    variable_averages_op = variable_averagers.apply(tf.trainable_variables())
+    # y = LeNet.interfernece(x, True, None)
+    y = tf.nn.softmax(y)
+    loss = -tf.reduce_mean(
+        y_ * tf.log(tf.clip_by_value(y, 1e-10, 1.0))
+    )
+    # loss = tf.reduce_mean(
+    #     tf.nn.softmax_cross_entropy_with_logits(
+    #         logits=y,
+    #         labels=y_
+    #     )
+    # )
     tf.summary.scalar(
         'loss',
         loss
@@ -52,6 +63,7 @@ def train(dataset):
     train_op = tf.train.GradientDescentOptimizer(
         learning_rate=LEARNING_RATE
     ).minimize(loss)
+    # train_op = tf.group(train_op, variable_averages_op)
     # 计算准确率
     with tf.name_scope('accuracy'):
         correct_predict = tf.equal(
@@ -82,13 +94,14 @@ def train(dataset):
                 x: train_images,
                 y_: labels
             }
-            _, loss_value, accuracy_value, summary, y_value = sess.run(
-                [train_op, loss, accuracy_tensor, merged, y],
+            _, loss_value, accuracy_value, summary, y_value, _ = sess.run(
+                [train_op, loss, accuracy_tensor, merged, y, global_step],
                 feed_dict=feed_dict
             )
             writer.add_summary(summary, i)
             if (i % 20) == 0:
-                print 'predict y value is ', np.argmax(y_value)
+                print 'predict y value is ', np.argmax(y_value, 1)
+                print 'predict the number of positive number is ', np.sum(np.argmax(y_value, 1))
                 print 'loss value is %g accuracy is %g' \
                       % (loss_value, accuracy_value)
             del train_images, labels, scores

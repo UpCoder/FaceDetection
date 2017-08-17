@@ -2,6 +2,7 @@ from PIL import ImageDraw, Image
 import numpy as np
 import selectivesearch
 import os
+import gc
 
 
 def ellipse_with_angle(im, x, y, major, minor, angle, color):
@@ -145,6 +146,75 @@ def split_arr(arr, count):
         res[count_index] = cur_arr
         count_index += 1
     return res
+
+
+def calu_IoU(image_path, region1, region2, type):
+    image = Image.open(image_path)
+    shape = list(np.shape(image))
+    region1_img = np.zeros([shape[0], shape[1]], dtype=np.uint8)
+    region1_img = Image.fromarray(region1_img)
+    region1_img_draw = ImageDraw.Draw(region1_img)
+    region1_img_draw.rectangle(
+        [region1[1], region1[0], region1[1] + region1[3], region1[0] + region1[2]],
+        fill=255,
+    )
+    region1_size = region1[2] * region1[3]
+    region2_img = np.zeros([shape[0], shape[1]], dtype=np.uint8)
+    region2_img = Image.fromarray(region2_img)
+    region2_img_draw = ImageDraw.Draw(region2_img)
+    region2_img_draw.rectangle(
+        [region2[1], region2[0], region2[1] + region2[3], region2[0] + region2[2]],
+        fill=255,
+    )
+    region2_size = region2[2] * region2[3]
+    region1_img = np.array(region1_img)
+    region2_img = np.array(region2_img)
+    equal_number = np.sum((region1_img == 255) * (region2_img == 255))
+    bing_number = np.sum(((region1_img == 255) + (region2_img == 255)) != 0)
+    if type == 'cross':
+        if bing_number == 0:
+            return 0.0
+        equal_rate = (equal_number * 1.0) / (bing_number * 1.0)  # euqal rate is IoU
+    elif type == 'min':
+        equal_rate = (equal_number * 1.0) / (min(region2_size, region1_size) * 1.0)
+    del image, region1_img, region2_img
+    gc.collect()
+    return equal_rate
+
+
+def draw_rects_in_image(image_path, rects):
+    image = read_image(image_path)
+    image_draw = ImageDraw.Draw(image)
+    for index, rect in enumerate(rects):
+        image_draw.rectangle(
+            [rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3]],
+            outline=(255, 0, 0)
+        )
+    image.show()
+
+
+def non_maximum_suppression(image_path, scores, regions, type='cross'):
+    draw_rects_in_image(image_path, regions)
+    sorted_index = np.argsort(scores)
+    scores = scores[sorted_index]
+    regions = regions[sorted_index]
+    threshold = 0.5
+    deleted = np.zeros(len(scores))
+    for index, score in enumerate(scores):
+        if deleted[index] == 1.0:
+            continue
+        draw_rects_in_image(image_path, [regions[index]])
+        print index
+        cur_region = regions[index]
+        for i in range(index+1, len(regions)):
+            IoU = calu_IoU(image_path, cur_region, regions[i], type)
+            print IoU, ' ',
+            if IoU > threshold:
+                deleted[i] = 1.0
+        print '\n'
+    new_regions = regions[deleted == 0.0]
+    draw_rects_in_image(image_path, new_regions)
+    print 'ok'
 
 if __name__ == '__main__':
     image_path = 'E:\\Resource\\DataSet\\FaceDetection\\TenFolds\\01\\img_591.jpg'

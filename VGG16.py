@@ -58,7 +58,7 @@ def do_conv(name, weight_shape, bias_shape, input_tensor):
         weight = tf.get_variable(
             'weight',
             shape=weight_shape,
-            initializer=tf.truncated_normal_initializer(stddev=0.1)
+            initializer=tf.contrib.layers.xavier_initializer()
         )
         bias = tf.get_variable(
             'bias',
@@ -80,14 +80,14 @@ def do_full_connection(name, weight_shape, bias_shape, input_tensor):
         weight = tf.get_variable(
             'weight',
             shape=weight_shape,
-            initializer=tf.truncated_normal_initializer(stddev=0.1)
+            initializer=tf.contrib.layers.xavier_initializer()
         )
         bias = tf.get_variable(
             'bias',
             shape=bias_shape,
             initializer=tf.constant_initializer(0.0)
         )
-        matmul = tf.matmul(input_tensor, weight) + bias
+        matmul = tf.nn.bias_add(tf.matmul(input_tensor, weight), bias)
         return tf.nn.relu(matmul)
 
 
